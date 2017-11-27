@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "cmath": "c",
+        "draw.h": "c",
+        "quaternion.h": "c",
+        "vector3.h": "c",
+        "sdl.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "camera.h": "c",
+        "list.h": "c",
+        "error.h": "c",
+        "objparser.h": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "system_error": "c"
+    }
+}
