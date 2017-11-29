@@ -12,34 +12,32 @@ int main(int argc, char *argv[])
 {
     draw_context_t *context = draw_context_new("rectangle", 800, 600);
 
-    doge_vec3_t p0 = doge_vec3_create(0.0f, 0.0f, -0.5f);
+    vec3_t p0 = create_vec3(0.0f, 0.0f, -0.5f);
 
-    doge_vec3_t p1 = doge_vec3_create(0, 3, 10);
-    doge_vec3_t p2 = doge_vec3_create(-2.5f, -1, 20);
-    doge_vec3_t p3 = doge_vec3_create(2.5f, -4, 10);
+    vec3_t p1 = create_vec3(0, 3, 10);
+    vec3_t p2 = create_vec3(-2.5f, -1, 20);
+    vec3_t p3 = create_vec3(2.5f, -4, 10);
 
     triangle_t triangle = triangle_create(p1, p2, p3);
 
     camera_t* cam = camera_create_new(p0, 80.0f);
 
+    //mesh_data_t* mesh = read_mesh_obj("suzanne.obj");
+
     float angle = 0;
 
     for(;;)
     {
-        float x = 400 + cos(angle) * 800;
-        float y = 400 + sin(angle) * 0;
+        float x = 400 + cos(angle) * 454;
+        float y = 400 + sin(angle) * 160;
 
         draw_context_clear(context, black);
 
-        //project_triangle(triangle, context, cam, yellow);
+        draw_rectangle_wireframe(context, triangle, cam, red);
 
-        //draw_rectangle_wireframe(context, triangle, cam, red);
+        draw_line_bresenham(context, 400, 300, x, y, yellow); //works
 
-        read_mesh_obj("suzanne.obj");
-
-        //draw_line_bresenham(context, 400, 300, x, y, yellow); //works
-
-         //angle += 0.01f;
+        angle += 0.01f;
 
         draw_context_blit(context);
     }

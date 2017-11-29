@@ -1,7 +1,7 @@
 #ifndef QUATERNON_H
 #define QUATERNON_H
 
-#include "vector3.h"
+#include "math.h"
 
 #define DOGE_2PI        6.28318530718
 #define DOGE_3PI_OVER2  4.71238898038
@@ -14,7 +14,7 @@
 typedef struct doge_quat
 {
 	float w;
-    doge_vec3_t v;
+    vec3_t v;
 }doge_quat_t;
 
 // const doge_quat_t indentity = { 1.0f, 0.0f, 0.0f, 0.0f};
@@ -35,10 +35,10 @@ void doge_quat_conjugate(doge_quat_t *);
 // w = w1 * w2 - v1 . v2, v = w1 * v2 + w2 * v1 + v1 x v2
 doge_quat_t doge_quat_mul(doge_quat_t, doge_quat_t);
 
-doge_vec3_t doge_quat_rotated_vec(doge_vec3_t, doge_quat_t);
+vec3_t doge_quat_rotated_vec(vec3_t, doge_quat_t);
 
 doge_quat_t doge_quat_slerp(doge_quat_t, doge_quat_t, float);
 
-doge_quat_t doge_quat_rot_from_to(doge_vec3_t, doge_vec3_t);
+doge_quat_t doge_quat_rot_from_to(vec3_t, vec3_t);
 
 #endif

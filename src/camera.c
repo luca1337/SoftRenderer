@@ -1,6 +1,6 @@
 #include "../include/camera.h"
 
-camera_t* camera_create_new(doge_vec3_t position, float fov)
+camera_t* camera_create_new(vec3_t position, float fov)
 {
     camera_t* cam = malloc(sizeof(camera_t));
 

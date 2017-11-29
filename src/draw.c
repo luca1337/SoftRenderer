@@ -29,6 +29,8 @@ draw_context_t *draw_context_new(const char *title, unsigned int width, unsigned
     context->delta_time      = 0;
     context->width           = width;
     context->height          = height;
+    context->half_width      = width / 2.0f;
+    context->half_height     = height / 2.0f;
     context->aspect_ratio    = (float)width / (float)height;
     context->last = SDL_GetPerformanceCounter();
 
