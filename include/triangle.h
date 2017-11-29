@@ -25,9 +25,14 @@ typedef struct triangle_vertex
 triangle_t triangle_create(vec3_t, vec3_t, vec3_t);
 
 //triangle constructor with vertexes
-triangle_t triangle_create_vert(vertex_t, vertex_t, vertex_t);
+triangle_t* triangle_create_vert(vertex_t, vertex_t, vertex_t);
 
 //wireframe rectangle
 void draw_rectangle_wireframe(draw_context_t*, triangle_t, camera_t*, draw_color_t);
+
+//draw for mesh
+void mesh_draw(camera_t*, triangle_vertex_t*, draw_context_t*, vec3_t, doge_quat_t, float, draw_color_t);
+
+void Scanline(draw_context_t*, int y, vertex_t, vertex_t, vertex_t, vertex_t, draw_color_t);
 
 #endif

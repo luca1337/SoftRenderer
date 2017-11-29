@@ -22,14 +22,14 @@ int main(int argc, char *argv[])
 
     camera_t* cam = camera_create_new(p0, 80.0f);
 
-    //mesh_data_t* mesh = read_mesh_obj("suzanne.obj");
+    mesh_data_t* mesh = read_mesh_obj("suzanne.obj");
 
     float angle = 0;
 
     for(;;)
     {
-        float x = 400 + cos(angle) * 454;
-        float y = 400 + sin(angle) * 160;
+        float x = 400 + cos(angle) * 1000;
+        float y = 400 + sin(angle) * 3;
 
         draw_context_clear(context, black);
 

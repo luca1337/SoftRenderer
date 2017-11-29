@@ -1,4 +1,6 @@
 #include "../include/objparser.h"
+#include "../include/list.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -13,44 +15,10 @@ void destroy_meshdata(mesh_data_t* mesh)
     free(mesh);
 }
 
-/*mesh_data_t* read_mesh_obj(const char* file_name)
-{
-    mesh_data_t* mesh = malloc(sizeof(mesh_data_t));
-
-    mesh->f = NULL;
-    mesh->v = NULL;
-    mesh->num_of_f = 0;
-    mesh->num_of_v = 0;
-    mesh->pos = doge_vec3_create(0.0f, 0.0f, 0.0f);
-    mesh->rot = doge_quat_create(0.0f, 0.0f, 0.0f, 1.0f);
-
-    char* file = read_file(file_name);
-
-    mesh->num_of_f = malloc(sizeof(float)*500000);
-    mesh->num_of_v = malloc(sizeof(float)*500000);
-
-    if(!file)
-    {
-        fprintf(stderr, "couldn't open file: %s", file_name);
-        destroy_meshdata(mesh);
-        return 0;
-    }
-
-    while(!feof(file))
-    {
-        if(strchr(file, '\n'))
-        {
-            fprintf(stdout, "awdawd");
-        }
-    }
-
-    fclose(file);
-    return mesh;
-}*/
-
 mesh_data_t* read_mesh_obj(const char *file_name)
 {
     mesh_data_t *mesh = malloc(sizeof(mesh_data_t));
+    memset(mesh, 0, sizeof(mesh_data_t));
     mesh->v = NULL;
     mesh->f = NULL;
     mesh->num_of_v = 0;
@@ -59,7 +27,13 @@ mesh_data_t* read_mesh_obj(const char *file_name)
     mesh->rot = doge_quat_create(0, 0, 0, 1);
     mesh->scale = create_vec3(1, 1, 1);
 
-    const char *file = read_file(file_name);
+    int* list_count = malloc(1000);
+
+    FILE* file = fopen(file_name, "r");
+    char* line = malloc(128);
+    int buff_size = 128;
+    aiv_list_t* mesh_list_all = aiv_list_new(list_count);
+
     if(!file)
     {
         fprintf(stderr, "Couldn't open file: %s\n", file_name);
@@ -67,101 +41,82 @@ mesh_data_t* read_mesh_obj(const char *file_name)
         return NULL;
     }
 
-    unsigned long v_size = 500000;
-    unsigned long f_size = 500000;
+    static int is_v = 0;
+    static int is_f = 0;
 
-    mesh->v = malloc(sizeof(float) * v_size);
-    mesh->f = malloc(sizeof(int) * f_size);
-    
-    const char *cur_line = file;
+    static int count = 0;
+    static int count2 = 0;
 
-    while(cur_line)
+    char* item;
+
+    aiv_list_t* float_v = aiv_list_new(list_count);
+    aiv_list_t* normal = aiv_list_new(list_count);
+    aiv_list_t* uv = aiv_list_new(list_count);
+    aiv_list_t* vec = aiv_list_new(list_count);
+
+    while(!feof(file))
     {
-        char *next_line = strchr(cur_line, '\n');
+        if(!fgets(line, buff_size, file))
+            break;
 
-        if(cur_line[0] == 'v' && cur_line[1] == ' ')
-        {
-            char *line_cpy = malloc((unsigned long)(next_line - cur_line) + 1);
-            memcpy(line_cpy, cur_line, (unsigned long)(next_line - cur_line));
-            line_cpy[next_line - cur_line + 1] = (char)0;
-            
-            int i = 0;
-            for(char *token = strtok(line_cpy, " "); token; token = strtok(NULL, " "))
-            {
-                if(i++ > 0)
-                {                
-                    mesh->v[mesh->num_of_v++] = atof(token);
-                }                
-            }
-            free(line_cpy);
-        }
-        else if(cur_line[0] == 'f')
-        {
-            char *line_cpy = malloc(next_line - cur_line + 1);
-            memcpy(line_cpy, cur_line, next_line - cur_line);
-            line_cpy[next_line - cur_line + 1] = (char)0;
+        fscanf(file, "%s", line);
 
-            char tokens[6][1000];
+        if(strcmp("f", line) == 0)
+        {
+            char* line_cpy = malloc((unsigned long)(line) - 1);
 
             int i = 0;
-            for(char *token = strtok(line_cpy, " "); token; token = strtok(NULL, " "))
+            for(item = strtok(line_cpy, " "); item; item = strtok(NULL, " "))
             {
-                memcpy(&(tokens[i][0]), token, strlen(token));
-                tokens[i][strlen(token) + 1] = (char)0;
-                i++;
-            }
-
-            for(i = 1; i < 5; i++)
-            {
-                int j = 0;
-                for(char *token = strtok(&(tokens[i][0]), "/"); token; token = strtok(NULL, "/"))
+                if(i > 0)
                 {
-                    if(!j++)
-                    {
-                        mesh->f[mesh->num_of_f++] = atoi(token) - 1;
-                    }
+                    fprintf(stdout, "%d", i);
+                    
+                    float* value = malloc(sizeof(float)); 
+                    *value = (float)atof(item);
+                    aiv_list_append(float_v,value);
                 }
             }
-            free(line_cpy);
         }
-
-        cur_line = next_line ? (next_line + 1) : NULL;
+        // else if(strcmp("v", line) == 0)
+        // {
+        //     count2++;
+        // }
+        // free(item);
     }
-    free((void *)file);
+
+    fprintf(stdout, "float for f: %lu\n", mesh->num_of_f);
+    fprintf(stdout, "float for v: %d\n", count2);
+
+    fclose(file);
+    
     return mesh;
 }
 
-void* read_file(char *file_name)
+char* load_file(char *file_name)
 {
-    FILE* stream = NULL;
-    const void* buffer = NULL;
-    long flen = 0;
+    FILE* file = NULL;
+    char* buffer = NULL;
+    long len = 0;
 
-    stream = fopen(file_name, "r");
-    if(!stream)
-    {
-        fprintf(stderr, "Couldn't open file: %s\n", file_name);
-        fclose(stream);
+    file = fopen(file_name, "r");
+    if(!file)
         return NULL;
-    }
 
-    fseek(stream, 0, SEEK_END);
-    flen = ftell(stream);
-    fseek(stream, 0, SEEK_SET);
+    fseek(file, 0, SEEK_END);
+    len = ftell(file);
+    fseek(file, 0, SEEK_SET);
 
-    buffer = malloc(flen);
+    buffer = malloc(len);
 
     if(!buffer)
     {
-        fprintf(stderr, "Couldn't allocate memory for the buffer");
-        fclose(stream);
+        fclose(file);
         return NULL;
     }
-    else
-    {
-        fread((void*)buffer, 1, flen, stream);
-    }
 
-    fclose(stream);
+    fread(buffer, 1, len, file);
+
+    fclose(file);
     return buffer;
 }

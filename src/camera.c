@@ -3,13 +3,7 @@
 camera_t* camera_create_new(vec3_t position, float fov)
 {
     camera_t* cam = malloc(sizeof(camera_t));
-
-    if(!cam)
-        return 0;
-
-    cam->position.x = position.x;
-    cam->position.y = position.y;
-    cam->position.z = position.z;
+    cam->position = position;
     cam->fov_y = fov;
     return cam;
 }

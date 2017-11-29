@@ -18,6 +18,6 @@ typedef struct mesh_data mesh_data_t;
 
 void destroy_meshdata(mesh_data_t*);
 mesh_data_t* read_mesh_obj(const char*);
-void* read_file(char*);
+char* load_file(char*);
 
 #endif

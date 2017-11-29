@@ -12,11 +12,9 @@ void proj(camera_t* cam, vertex_t* vertex, vec3_t pos, doge_quat_t rot, float sc
     vertex->world_normal = normalized_vec3(vertex->normal);
     vertex->world_view_pos = sub_vec3(vertex->world_pos, cam->position);
 
-    // point in NDC coordinates (-1 -- 1)
     float yp = vertex->world_view_pos.y / (vertex->world_view_pos.z * (float)tan(cam->fov_y / 2));
     float xp = vertex->world_view_pos.x / (vertex->world_view_pos.z * (float)tan(cam->fov_y / 2));
 
-    // to pixel coordinates
     int nxp = (int)(xp * half_w + half_w);
     int nyp = (int)(-yp * half_h + half_h);
 
