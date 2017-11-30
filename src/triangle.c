@@ -73,22 +73,40 @@ void mesh_draw(camera_t* cam, triangle_vertex_t* vertex, draw_context_t* context
     vertex_t p2 = vertex->b;
     vertex_t p3 = vertex->c;
 
+    if (p2.world_proj_pos.y < p1.world_proj_pos.y)
+    {
+        vertex_t tmp = p1;
+        p1 = p2;
+        p2 = tmp;
+    }
+
+    if (p3.world_proj_pos.y < p2.world_proj_pos.y)
+    {
+        vertex_t tmp = p2;
+        p2 = p3;
+        p3 = tmp;
+    }
+
+    if (p2.world_proj_pos.y < p1.world_proj_pos.y)
+    {
+        vertex_t tmp = p1;
+        p1 = p2;
+        p2 = tmp;
+    }
+
     float iSlopeP1P2 = (p2.world_proj_pos.x - p1.world_proj_pos.x) / (p2.world_proj_pos.y - p1.world_proj_pos.y);
     float iSlopeP1P3 = (p3.world_proj_pos.x - p1.world_proj_pos.x) / (p3.world_proj_pos.y - p1.world_proj_pos.y);
 
     if (iSlopeP1P2 < iSlopeP1P3)
     {
-        // iterate from P1.Y to P3.Y
         for (int y = (int)p1.world_proj_pos.y; y <= (int)p3.world_proj_pos.y; y++)
         {
             if (y < p2.world_proj_pos.y)
             {
-                // phase 1
                 Scanline(context, y, p1, p2, p1, p3, color);
             }
             else
             {
-                // phase 2
                 Scanline(context, y, p2, p3, p1, p3, color);
             }
         }
@@ -99,12 +117,10 @@ void mesh_draw(camera_t* cam, triangle_vertex_t* vertex, draw_context_t* context
         {
             if (y < p2.world_proj_pos.y)
             {
-                // phase 1
                 Scanline(context, y, p1, p3, p1, p2, color);
             }
             else
             {
-                // phase 2
                 Scanline(context, y, p1, p3, p2, p3, color);
             }
         }

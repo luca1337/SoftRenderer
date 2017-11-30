@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "SDL/SDL.h"
+#include "math.h"
 
 struct draw_context
 {
@@ -38,5 +39,8 @@ void draw_context_blit(draw_context_t *);
 void draw_context_clear(draw_context_t *, draw_color_t);
 void draw_context_put_pixel(draw_context_t *, int, int, draw_color_t);
 void draw_line_bresenham(draw_context_t*, int, int, int, int, draw_color_t);
+int PointInTriangle(vec3_t, vec3_t, vec3_t, vec3_t);
+void RasterizationBoundingBox(vec3_t, vec3_t, vec3_t, draw_context_t*, draw_color_t);
+float Sign(vec3_t, vec3_t, vec3_t);
 
 #endif
