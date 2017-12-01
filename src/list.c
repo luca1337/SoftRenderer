@@ -4,32 +4,32 @@
 #include "../include/error.h"
 
 
-aiv_list_t *aiv_list_new(int *err_code)
+list_t *list_new(int *err_code)
 {
     if (err_code)
         *err_code = AIV_OK;
-    aiv_list_t *list = malloc(sizeof(aiv_list_t));
+    list_t *list = malloc(sizeof(list_t));
     if (!list) 
     {
         if (err_code)
             *err_code = AIV_NO_MEM;
         return NULL;
     }
-    memset(list, 0, sizeof(aiv_list_t));
+    memset(list, 0, sizeof(list_t));
     return list;
 }
 
-int aiv_list_init(aiv_list_t *list, int *err_code)
+int list_init(list_t *list, int *err_code)
 {
     if (err_code)
         *err_code = AIV_OK;
-    memset(list, 0, sizeof(aiv_list_t));
+    memset(list, 0, sizeof(list_t));
     return 0;
 }
 
-int aiv_list_append(aiv_list_t *list, void *element)
+int list_append(list_t *list, void *element)
 {
-    aiv_list_item_t *list_item = malloc(sizeof(aiv_list_item_t));
+    list_item_t *list_item = malloc(sizeof(list_item_t));
     if (!list_item)
     {
         return AIV_NO_MEM;
@@ -55,21 +55,21 @@ int aiv_list_append(aiv_list_t *list, void *element)
     return AIV_OK;
 }
 
-void aiv_list_destroy(aiv_list_t *list)
+void list_destroy(list_t *list)
 {
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
     while(item)
     {
-        aiv_list_item_t *next = item->next;
+        list_item_t *next = item->next;
         free(item);
         item = next; 
     }
     free(list);
 }
 
-int aiv_list_remove(aiv_list_t *list, void *element)
+int list_remove(list_t *list, void *element)
 {
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
     while(item)
     {
         if(element == item->data)
@@ -106,10 +106,10 @@ int aiv_list_remove(aiv_list_t *list, void *element)
     return AIV_NOT_FOUND;
 }
 
-int aiv_list_remove_index(aiv_list_t *list, unsigned int index)
+int list_remove_index(list_t *list, unsigned int index)
 {
     unsigned int counter = 0;
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
     while(item)
     {
         if(counter == index)
@@ -146,7 +146,7 @@ int aiv_list_remove_index(aiv_list_t *list, unsigned int index)
     return AIV_NOT_FOUND;
 }
 
-aiv_list_item_t *aiv_list_iter(aiv_list_t *list, aiv_list_item_t **context)
+list_item_t *list_iter(list_t *list, list_item_t **context)
 {
     if (list->is_iterating && !*context) {
         list->is_iterating = 0;
@@ -163,9 +163,9 @@ aiv_list_item_t *aiv_list_iter(aiv_list_t *list, aiv_list_item_t **context)
     return *context;
 }
 
-int aiv_list_append_uniq(aiv_list_t *list, void *element)
+int list_append_uniq(list_t *list, void *element)
 {
-    aiv_list_item_t *current = list->head;
+    list_item_t *current = list->head;
     while(current)
     {
         if(current->data == element)
@@ -175,7 +175,7 @@ int aiv_list_append_uniq(aiv_list_t *list, void *element)
         current = current->next;
     }
 
-    aiv_list_item_t *list_item = malloc(sizeof(aiv_list_item_t));
+    list_item_t *list_item = malloc(sizeof(list_item_t));
     if (!list_item)
         return AIV_NO_MEM;
 
@@ -201,23 +201,23 @@ int aiv_list_append_uniq(aiv_list_t *list, void *element)
 
 }
 
-int aiv_list_insert(aiv_list_t *list, unsigned int index, void *element)
+int list_insert(list_t *list, unsigned int index, void *element)
 {
-    unsigned int len = aiv_list_len(list);
+    unsigned int len = list_len(list);
 
     if(index > len)
         return AIV_NOT_FOUND;
 
     if(index == len)
-        return aiv_list_append(list, element);
+        return list_append(list, element);
 
-    aiv_list_item_t *new_item = malloc(sizeof(aiv_list_item_t));
+    list_item_t *new_item = malloc(sizeof(list_item_t));
     if(!new_item)
         return AIV_NO_MEM;
 
     new_item->data = element;
 
-    aiv_list_item_t **item = &list->head;
+    list_item_t **item = &list->head;
     unsigned int counter = 0;
 
     while(*item)
@@ -243,24 +243,24 @@ int aiv_list_insert(aiv_list_t *list, unsigned int index, void *element)
     return 0;
 }
 
-int aiv_list_insert_uniq(aiv_list_t *list, unsigned int index, void *element)
+int list_insert_uniq(list_t *list, unsigned int index, void *element)
 {
-    int len = aiv_list_len(list);
+    int len = list_len(list);
 
     if(index > len)
         return AIV_NOT_FOUND;
     
     if(index == len)
-        return aiv_list_append_uniq(list, element);
+        return list_append_uniq(list, element);
 
-    aiv_list_item_t *new_item = malloc(sizeof(aiv_list_item_t));
+    list_item_t *new_item = malloc(sizeof(list_item_t));
     if(!new_item)
         return AIV_NO_MEM;
 
     new_item->data = element;
 
-    aiv_list_item_t *item = list->head;
-    aiv_list_item_t **item_found = NULL;
+    list_item_t *item = list->head;
+    list_item_t **item_found = NULL;
     unsigned int counter = 0;
 
     while(item)
@@ -291,9 +291,9 @@ int aiv_list_insert_uniq(aiv_list_t *list, unsigned int index, void *element)
     return AIV_OK;
 }
 
-int aiv_list_contains(aiv_list_t *list, void *element)
+int list_contains(list_t *list, void *element)
 {
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
 
     while(item)
     {
@@ -306,12 +306,12 @@ int aiv_list_contains(aiv_list_t *list, void *element)
     return AIV_NOT_FOUND;
 }
 
-int aiv_list_contains_at(aiv_list_t *list, void *element, unsigned int index)
+int list_contains_at(list_t *list, void *element, unsigned int index)
 {
-    if(index >= aiv_list_len(list))
+    if(index >= list_len(list))
         return AIV_NOT_FOUND;
 
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
     unsigned int counter = 0;
 
     while(item)
@@ -325,29 +325,29 @@ int aiv_list_contains_at(aiv_list_t *list, void *element, unsigned int index)
     return AIV_NOT_FOUND;
 }
 
-int aiv_list_len(aiv_list_t *list)
+int list_len(list_t *list)
 {
     return list->count;
 }
 
-int aiv_list_slow_len(aiv_list_t *list)
+int list_slow_len(list_t *list)
 {
     unsigned int len = 0;
 
-    for(aiv_list_item_t *list_item = list->head; list_item; list_item = list_item->next) len++;
+    for(list_item_t *list_item = list->head; list_item; list_item = list_item->next) len++;
 
     return len;
 
 }
 
-void aiv_list_shuffle(aiv_list_t *list)
+void list_shuffle(list_t *list)
 {
-    unsigned int len = aiv_list_len(list);
+    unsigned int len = list_len(list);
     if(len <= 1)
         return;
         
-    aiv_list_item_t *item  = list->head;
-    aiv_list_item_t *start = item;
+    list_item_t *item  = list->head;
+    list_item_t *start = item;
 
     unsigned int random = (unsigned int)(((double)rand() / RAND_MAX) * len);
     unsigned int i = 0;
@@ -388,13 +388,13 @@ static int deafult_comparer(void *left, void *right)
     return 0;
 }
 
-void aiv_list_sort(aiv_list_t *list, int (*comparer)(void *, void *))
+void list_sort(list_t *list, int (*comparer)(void *, void *))
 {
-    unsigned int len = aiv_list_len(list);
+    unsigned int len = list_len(list);
     if(len <= 1)
         return;
         
-    aiv_list_item_t *item = list->head;
+    list_item_t *item = list->head;
 
     if(!comparer)
         comparer = deafult_comparer;
@@ -419,15 +419,15 @@ void aiv_list_sort(aiv_list_t *list, int (*comparer)(void *, void *))
     }
 }
 
-void aiv_list_reverse(aiv_list_t *list)
+void list_reverse(list_t *list)
 {
-    unsigned int len = aiv_list_len(list);
+    unsigned int len = list_len(list);
 
     if(len <= 1)
         return;
 
-    aiv_list_item_t *head = list->head;
-    aiv_list_item_t *tail = list->tail;
+    list_item_t *head = list->head;
+    list_item_t *tail = list->tail;
     
     while(tail != head)
     {
@@ -443,9 +443,9 @@ void aiv_list_reverse(aiv_list_t *list)
     }
 }
 
-aiv_list_t *aiv_list_sublist(aiv_list_t *list, unsigned int index, int *err_code)
+list_t *list_sublist(list_t *list, unsigned int index, int *err_code)
 {
-    if(index >= aiv_list_len(list))
+    if(index >= list_len(list))
     {
         if(err_code)
             *err_code = AIV_NOT_FOUND;
@@ -453,7 +453,7 @@ aiv_list_t *aiv_list_sublist(aiv_list_t *list, unsigned int index, int *err_code
         return NULL;
     }
 
-    aiv_list_t *sub = aiv_list_new(NULL);
+    list_t *sub = list_new(NULL);
 
     if(!sub)
     {
@@ -465,23 +465,23 @@ aiv_list_t *aiv_list_sublist(aiv_list_t *list, unsigned int index, int *err_code
     
     unsigned int i = 0;
 
-    for(aiv_list_item_t *item = list->head; item; item = item->next)
+    for(list_item_t *item = list->head; item; item = item->next)
     {
         if(i++ >= index)
         {
-            aiv_list_append(sub, item->data);
+            list_append(sub, item->data);
         }
     }
 
     return sub;
 }
 
-void **aiv_list_to_array(aiv_list_t *list, int *err_code)
+void **list_to_array(list_t *list, int *err_code)
 {
     if (err_code)
         *err_code = AIV_OK;
 
-    unsigned int len = aiv_list_len(list);
+    unsigned int len = list_len(list);
 
     void **array = malloc(sizeof(void *) * len);
     if (!array) 
@@ -492,7 +492,7 @@ void **aiv_list_to_array(aiv_list_t *list, int *err_code)
     }
 
     unsigned int i = 0;
-    aiv_list_item_t *copy  = list->head; 
+    list_item_t *copy  = list->head; 
 
     while(copy)
     {

@@ -2,51 +2,32 @@
 #define OBJPARSER_H
 
 #include "triangle.h"
+#include "list.h"
 
-typedef struct mesh_vec3
+
+typedef struct mesh_v3
 {
-    float x;
-    float y;
-    float z;
-}mesh_vec3_t;
+	float x;
+	float y;
+	float z;
+}mesh_v3_t;
 
 typedef struct mesh_uv
 {
-    float u;
-    float v;
+	float u;
+	float v;
 }mesh_uv_t;
 
-typedef struct mesh_vertex
+typedef struct data
 {
-    size_t v_idx;
-    size_t vt_idx;
-    size_t vn_idx;
-}mesh_vertex_t;
+	mesh_v3_t* v;
+	float* f;
+	int num_v;
+	int num_f;
+}data_t;
 
-typedef struct mesh_face
-{
-	mesh_vertex_t v1;
-	mesh_vertex_t v2;
-	mesh_vertex_t v3;
-} mesh_face_t;
-
-typedef struct mesh_ctx
-{
-	mesh_vec3_t *v;
-	mesh_vec3_t *vn;
-	mesh_vec3_t *vt;
-	mesh_face_t *faces;
-	size_t v_cnt;
-	size_t vn_cnt;
-	size_t vt_cnt;
-	size_t faces_cnt;
-} mesh_ctx_t;
-
-int mesh_parse_vec3(char*, size_t, mesh_vec3_t*);
-void mesh_parse_init(mesh_ctx_t*);
-void mesh_parse_destroy(mesh_ctx_t*);
-
-char* strsep2(char**, const char*);
-
+list_t* parse_file_float(char*);
+list_t* parse_file_split_str(char*, size_t, mesh_v3_t*);
+int parse_file_vec3(char*, size_t, mesh_v3_t*);
 
 #endif

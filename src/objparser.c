@@ -7,46 +7,79 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-int mesh_parse_vec3(char* line, size_t size, mesh_vec3_t* v3)
+list_t* parse_file_float(char* arg)
 {
-    float *vfields[3];
-	vfields[0] = (float *)((void *)v3 + offsetof(mesh_vec3_t, x));
-	vfields[1] = (float *)((void *)v3 + offsetof(mesh_vec3_t, y));
-	vfields[2] = (float *)((void *)v3 + offsetof(mesh_vec3_t, z));
-
-    size_t findx = 0;
-
-    char* ptrline = line;
-    for(size_t i = 0; i < size; i++)
+    int* err_code = malloc(sizeof(int));
+    list_t* float_list = list_new(err_code);
+    char* curr = arg;
+    char* ptr = ((void*)0);
+    float num = (float)strtof(curr, &ptr);
+    float* insert = &num;
+    list_append(float_list, (float*)insert);
+    size_t len = list_len(float_list);
+    char* line = malloc(sizeof(char) * strlen(arg) + 1);
+    /*strcpy(line, arg);
+    static int i = 0;
+    for(char* token = strtok(line, "f"); token; token = strtok(NULL, "f"))
     {
-        if(isspace(line[i] || i + 1 == size))
+        if(i++ > 0)
         {
-            errno = 0;
-            char *next_ptr = NULL;
-            *vfields[findx++] = strtof(ptrline, &next_ptr);
 
-            if (errno != 0 || ptrline == next_ptr)
-                return -1;
-
-            ptrline = next_ptr;
-
-            if (findx > 2)
-                break;
         }
+    }*/
+    return float_list;
+}
+
+list_t* parse_file_split_str(char* _arg, size_t len, mesh_v3_t* v3)
+{
+    if(len < 2)
+        return NULL;
+
+    int* err_code = malloc(sizeof(int));
+    list_t* str_list = list_new(err_code);
+    data_t* mesh = malloc(sizeof(data_t));
+    char* ptr = malloc(sizeof(char) * strlen(_arg) + 1);
+    strcpy(ptr, _arg);
+    if(ptr[0] == 'v' && ptr[1] == ' ')
+    {
+        mesh->num_v++;
+        float val = strtof(_arg, &ptr);
+        list_append(str_list, (float*)ptr);
+        printf("%s\n", ptr);
+        return str_list;
     }
-    return findx == 3 ? 0 : -1;
+    return NULL;
 }
 
-void mesh_parse_init(mesh_ctx_t* mesh)
+int parse_file_vec3(char* line, size_t len, mesh_v3_t* v3)
 {
-    memset(mesh, 0, sizeof(mesh_ctx_t));
-}
+    // get pointers to struct members
+	float *vfields[3];
+	vfields[0] = (float *)((void *)v3 + offsetof(mesh_v3_t, x));
+	vfields[1] = (float *)((void *)v3 + offsetof(mesh_v3_t, y));
+	vfields[2] = (float *)((void *)v3 + offsetof(mesh_v3_t, z));
 
-void mesh_parse_destroy(mesh_ctx_t* mesh)
-{
-    if(mesh->faces) free(mesh->faces);
-    if(mesh->v) free(mesh->v);
-    if(mesh->vn) free(mesh->vn);
-    if(mesh->vt) free(mesh->vt);
-    free(mesh);
+	size_t field_index = 0;
+
+	// ptr always points to the current split-part
+	char *ptr = line;
+	for(size_t i=0;i<len;i++)
+	{
+		if (isspace(line[i]) || i + 1 == len)
+		{
+			// strtof will set errno accordingly
+			errno = 0;
+			char *next_ptr = NULL;
+			*vfields[field_index++] = strtof(ptr, &next_ptr);
+			if (errno != 0 || ptr == next_ptr)
+				return -1;
+
+			ptr = next_ptr;
+
+			// we have z !
+			if (field_index > 2)
+				break;
+		}
+	}
+	return field_index == 3 ? 0 : -1;
 }
