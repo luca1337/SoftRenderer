@@ -4,30 +4,24 @@
 #include "triangle.h"
 #include "list.h"
 
-
-typedef struct mesh_v3
+typedef struct mesh
 {
-	float x;
-	float y;
-	float z;
-}mesh_v3_t;
-
-typedef struct mesh_uv
-{
-	float u;
-	float v;
-}mesh_uv_t;
-
-typedef struct data
-{
-	mesh_v3_t* v;
+	float* u;
+	float* v;
+	float* vn;
+	float* vt;
 	float* f;
-	int num_v;
-	int num_f;
-}data_t;
+	int u_count;
+	int v_count;
+	int vn_count;
+	int vt_count;
+	int f_count;
+}mesh_t;
 
-list_t* parse_file_float(char*);
-list_t* parse_file_split_str(char*, size_t, mesh_v3_t*);
-int parse_file_vec3(char*, size_t, mesh_v3_t*);
+mesh_t* mesh_create();
+mesh_t* mesh_destroy(mesh_t* mesh);
+void mesh_init(mesh_t* mesh);
+// mesh_t* parse_file_float(char*);
+mesh_t* parse_obj(char*);
 
 #endif
