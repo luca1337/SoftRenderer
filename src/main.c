@@ -41,8 +41,7 @@ int main(int argc, char *argv[])
     triangle_vertex_t* vert = malloc(sizeof(triangle_vertex_t));
 
     mesh_v3_t v3;
-    parse_file_split_str("v 123.03 138.93", 20, &v3);
-
+    
     //something();
 
     /*test(test_parse_float_green_light);
@@ -60,6 +59,7 @@ int main(int argc, char *argv[])
         draw_rectangle_wireframe(context, triangle, cam, red);
 
         //test methods
+        parse_file_split_str("v 134.99387", 20, &v3);
 
         RasterizationBoundingBox(p1, p2, p3, context, red);
 

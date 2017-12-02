@@ -42,11 +42,14 @@ list_t* parse_file_split_str(char* _arg, size_t len, mesh_v3_t* v3)
     strcpy(ptr, _arg);
     if(ptr[0] == 'v' && ptr[1] == ' ')
     {
-        mesh->num_v++;
-        float val = strtof(_arg, &ptr);
-        list_append(str_list, (float*)ptr);
-        printf("%s\n", ptr);
-        return str_list;
+        int i = 0;
+        for(char* token = strtok(ptr, "v"); token; token = strtok(NULL, "v"))
+        {
+            mesh->num_v++;
+            float val = (float)atof(token);
+            fprintf(stdout, "%f\n", val);
+            return str_list;
+        }
     }
     return NULL;
 }
