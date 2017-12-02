@@ -109,33 +109,36 @@ mesh_t* parse_obj(char* _arg)
             int i = 0;
             for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) if(i++ > 0) mesh->vt[mesh->vt_count++];
         }
-
         if(lines[0] == 'f')
         {
-            char* lines = malloc(sizeof(char) * 5000);
+            char* cpy_line = malloc(sizeof(char) * strlen(lines) + 1);
 
-            char tokens[SIZE][1000];
             static int i = 0;
             for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
             {
-                //todo
+                if(i++ > 0)
+                {
+                    strcpy(cpy_line, token);
+                }
             }
 
             for(i = 1; i < SIZE; i++)
             {
                 int j = 0;
-                for(char *token = strtok(&(tokens[i][0]), "/"); token; token = strtok(NULL, "/"))
+                for(char *token = strtok(cpy_line, "/"); token; token = strtok(((void*)0), "/"))
                 {
+                    
                     if(j++ < 3)
                     {
                         mesh->f[mesh->f_count++];
+                        printf("%s\n", token);
                     }
                 }
             }
         }
     }
 
-    fprintf(stdout, "v: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
+    fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
 
     /*int* err_code = malloc(sizeof(int));
     mesh_t* mesh = mesh_create();
