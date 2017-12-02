@@ -17,6 +17,7 @@
         "math.h": "c",
         "stdio.h": "c",
         "ctype.h": "c",
-        "triangle.h": "c"
+        "triangle.h": "c",
+        "errno.h": "c"
     }
 }

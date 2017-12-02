@@ -9,29 +9,6 @@
 
 #define SIZE 4
 
-// mesh_t* parse_file_float(char* arg)
-// {
-//     int* err_code = malloc(sizeof(int));
-//     list_t* float_list = list_new(err_code);
-//     char* curr = arg;
-//     char* ptr = ((void*)0);
-//     float num = (float)strtof(curr, &ptr);
-//     float* insert = &num;
-//     list_append(float_list, (float*)insert);
-//     size_t len = list_len(float_list);
-//     char* line = malloc(sizeof(char) * strlen(arg) + 1);
-//     /*strcpy(line, arg);
-//     static int i = 0;
-//     for(char* token = strtok(line, "f"); token; token = strtok(NULL, "f"))
-//     {
-//         if(i++ > 0)
-//         {
-
-//         }
-//     }*/
-//     return float_list;
-// }
-
 mesh_t* mesh_create()
 {
     mesh_t* mesh = malloc(sizeof(mesh_t));
@@ -109,6 +86,8 @@ mesh_t* parse_obj(char* _arg)
             int i = 0;
             for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) if(i++ > 0) mesh->vt[mesh->vt_count++];
         }
+
+        //parse f
         if(lines[0] == 'f')
         {
             char* cpy_line = malloc(sizeof(char) * strlen(lines) + 1);
@@ -131,27 +110,16 @@ mesh_t* parse_obj(char* _arg)
                     if(j++ < 3)
                     {
                         mesh->f[mesh->f_count++];
-                        printf("%s\n", token);
+                        // printf("%s\n", token);
                     }
                 }
             }
+
+            free(cpy_line);
         }
     }
-
-    fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
-
-    /*int* err_code = malloc(sizeof(int));
-    mesh_t* mesh = mesh_create();
-    char* ptr = malloc(sizeof(char) * strlen(_arg) + 1);
-    strcpy(ptr, _arg);
-    if(ptr[0] == 'v' && ptr[1] == ' ')
-    {
-        for(char* token = strtok(ptr, "v"); token; token = strtok(NULL, "v"))
-        {
-            float val = (float)atof(token);
-            fprintf(stdout, "%f\n", val);
-        }
-    }*/
+    //fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
+    free(lines);
     free((void*)file);
 
     return mesh;
