@@ -16,7 +16,16 @@ typedef struct mesh
 	int vn_count;
 	int vt_count;
 	int f_count;
+	vec3_t position;
+	doge_quat_t rot;
 }mesh_t;
+
+typedef struct mesh_vec3
+{
+	float x;
+	float y;
+	float z;
+}mesh_vec3_t;
 
 mesh_t* mesh_create();
 mesh_t* mesh_destroy(mesh_t* mesh);

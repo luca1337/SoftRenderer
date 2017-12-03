@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include "SDL/SDL.h"
 #include "math.h"
+#include "camera.h"
+// #include "objparser.h"
 
 struct draw_context
 {
@@ -42,5 +44,6 @@ void draw_line_bresenham(draw_context_t*, int, int, int, int, draw_color_t);
 int PointInTriangle(vec3_t, vec3_t, vec3_t, vec3_t);
 void RasterizationBoundingBox(vec3_t, vec3_t, vec3_t, draw_context_t*, draw_color_t);
 float Sign(vec3_t, vec3_t, vec3_t);
+// void mesh_draw(draw_context_t*, mesh_t*, camera_t*, draw_color_t);
 
 #endif

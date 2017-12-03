@@ -2,6 +2,8 @@
 #include "../include/draw.h"
 #include "../include/quaternion.h"
 #include "../include/math.h"
+#include "../include/camera.h"
+#include "../include/objparser.h"
 
 #define MIN(x,y) (x < y ? x : y)
 #define MAX(x,y) (x > y ? x : y)
@@ -113,6 +115,14 @@ void draw_line_bresenham(draw_context_t* context, int x1, int y1, int x2, int y2
         }
     }
 }
+
+// void mesh_draw(draw_context_t* context, mesh_t* mesh, camera_t* cam, draw_color_t color)
+// {
+//     while(mesh->f_count)
+//     {
+        
+//     }
+// }
 
 float Sign(vec3_t p1, vec3_t p2, vec3_t p3)
 {

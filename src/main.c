@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     mesh_t* mesh = parse_obj("suzanne.obj");
 
-    fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
+    // fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
 
     //triangle_vertex_t* vert = malloc(sizeof(triangle_vertex_t));
 

@@ -37,6 +37,8 @@ void mesh_init(mesh_t* mesh)
     mesh->v_count = 0;
     mesh->vn_count = 0;
     mesh->vt_count = 0;
+    mesh->position = create_vec3(0, 0, 0);
+    mesh->rot = doge_quat_create(0, 0, 0, 1);
 }
 
 mesh_t* parse_obj(char* _arg)
@@ -48,6 +50,9 @@ mesh_t* parse_obj(char* _arg)
     //create mesh to store all values and init it
     mesh_t* mesh = mesh_create();
     mesh_init(mesh);
+
+    //create data structure to store all values
+    mesh_vec3_t* v = malloc(sizeof(mesh_vec3_t));
 
     if(!file)
     {
@@ -74,7 +79,15 @@ mesh_t* parse_obj(char* _arg)
         if(lines[0] == 'v' && lines[1] == ' ')
         {
             int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) if(i++ > 0) mesh->v[mesh->v_count++];
+            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) 
+            if(i++ > 0)
+            {
+                float x = v->x;
+                float y = v->y;
+                float z = v->z; 
+                x = atof(&token[0]);
+                fprintf(stdout, "%f\n", v->x);
+            }
         }
         else if(lines[1] == 'n')
         {
