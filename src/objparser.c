@@ -79,25 +79,35 @@ mesh_t* parse_obj(char* _arg)
         if(lines[0] == 'v' && lines[1] == ' ')
         {
             int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) 
-            if(i++ > 0)
+            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
             {
-                float x = v->x;
-                float y = v->y;
-                float z = v->z; 
-                x = atof(&token[0]);
-                fprintf(stdout, "%f\n", v->x);
+                if(i++ > 0)
+                {
+                    //Implement buffer to hold all the data
+                }
             }
         }
         else if(lines[1] == 'n')
         {
             int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) if(i++ > 0) mesh->vn[mesh->vn_count++];
+            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
+            {
+                if(i++ > 0)
+                {
+                    
+                }
+            }
         }
         else if(lines[1] == 't')
         {
             int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " ")) if(i++ > 0) mesh->vt[mesh->vt_count++];
+            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
+            {
+                if(i++ > 0) 
+                {
+                    //Implement buffer to hold all the data
+                }
+            }
         }
 
         //parse f
@@ -119,11 +129,9 @@ mesh_t* parse_obj(char* _arg)
                 int j = 0;
                 for(char *token = strtok(cpy_line, "/"); token; token = strtok(((void*)0), "/"))
                 {
-                    
                     if(j++ < 3)
                     {
-                        mesh->f[mesh->f_count++];
-                        // printf("%s\n", token);
+                       //Implement buffer to hold all the data
                     }
                 }
             }
