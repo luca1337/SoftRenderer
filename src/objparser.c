@@ -127,7 +127,8 @@ mesh_t* parse_obj(char* _arg)
                 {
                     if(j++ < 3)
                     {
-                        data_buffer_add_element_i(mesh->f, atoi(token) - 1);
+                        int value = atoi(token) - 1;
+                        data_buffer_add_element_i(mesh->f, value);
                         // int a = atoi(token);
                         // fprintf(stdout, "\n%i\n", a);
                     }
