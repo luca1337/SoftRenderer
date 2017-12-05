@@ -3,21 +3,19 @@
 
 #include "triangle.h"
 #include "list.h"
+#include "databuffer.h"
 
 typedef struct mesh
 {
-	float* u;
-	float* v;
-	float* vn;
-	float* vt;
-	float* f;
-	int u_count;
-	int v_count;
-	int vn_count;
-	int vt_count;
-	int f_count;
+	data_buffer_f_t* v;
+	data_buffer_f_t* uv;
+	data_buffer_f_t* n;
+
+	data_buffer_f_t* f;
+
 	vec3_t position;
 	doge_quat_t rot;
+
 }mesh_t;
 
 typedef struct mesh_vec3
@@ -30,6 +28,7 @@ typedef struct mesh_vec3
 mesh_t* mesh_create();
 mesh_t* mesh_destroy(mesh_t* mesh);
 void mesh_init(mesh_t* mesh);
+// void iterator_mesh(mesh_t *, triangle_t *, int *);
 // mesh_t* parse_file_float(char*);
 mesh_t* parse_obj(char*);
 

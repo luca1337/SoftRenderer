@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <math.h>
+#include "../include/databuffer.h"
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -17,26 +18,19 @@ mesh_t* mesh_create()
 
 mesh_t* mesh_destroy(mesh_t* mesh)
 {
-    if(mesh->u)     free(mesh->u);
     if(mesh->v)     free(mesh->v);
-    if(mesh->vn)    free(mesh->vn);
-    if(mesh->vt)    free(mesh->vt);
+    if(mesh->uv)    free(mesh->uv);
+    if(mesh->n)     free(mesh->n);
     if(mesh->f)     free(mesh->f);
     if(mesh)        free(mesh);
 }
 
 void mesh_init(mesh_t* mesh)
 {
-    mesh->u = NULL;
     mesh->v = NULL;
+    mesh->uv = NULL;
+    mesh->n = NULL;
     mesh->f = NULL;
-    mesh->vn = NULL;
-    mesh->vt = NULL;
-    mesh->f_count = 0;
-    mesh->u_count = 0;
-    mesh->v_count = 0;
-    mesh->vn_count = 0;
-    mesh->vt_count = 0;
     mesh->position = create_vec3(0, 0, 0);
     mesh->rot = doge_quat_create(0, 0, 0, 1);
 }
@@ -44,7 +38,7 @@ void mesh_init(mesh_t* mesh)
 mesh_t* parse_obj(char* _arg)
 {
     //open and allocate memory for file
-    FILE* file = fopen(_arg, "r");
+    FILE* file = fopen(_arg, "rb");
     char* lines = malloc(sizeof(char) * 1000);
 
     //create mesh to store all values and init it
@@ -62,11 +56,10 @@ mesh_t* parse_obj(char* _arg)
         return NULL;
     }
 
-    mesh->u = malloc(sizeof(float*) * 50000);
-    mesh->v = malloc(sizeof(float*) * 50000);
-    mesh->f = malloc(sizeof(float*) * 50000);
-    mesh->vt = malloc(sizeof(float*) * 50000);
-    mesh->vn = malloc(sizeof(float*) * 50000);
+    mesh->v = data_buffer_new_f(0x0);
+    mesh->uv = data_buffer_new_f(0x0);
+    mesh->n = data_buffer_new_f(0x0);
+    mesh->f = data_buffer_new_i(0x0);
 
     //enter in the loop and start parsing the file
     while(!feof(file))
@@ -83,7 +76,8 @@ mesh_t* parse_obj(char* _arg)
             {
                 if(i++ > 0)
                 {
-                    //Implement buffer to hold all the data
+                    float value = atof(token);
+                    data_buffer_add_element_f(mesh->v, value);
                 }
             }
         }
@@ -94,7 +88,8 @@ mesh_t* parse_obj(char* _arg)
             {
                 if(i++ > 0)
                 {
-                    
+                    float value = atof(token);
+                    data_buffer_add_element_f(mesh->n, value);
                 }
             }
         }
@@ -105,7 +100,8 @@ mesh_t* parse_obj(char* _arg)
             {
                 if(i++ > 0) 
                 {
-                    //Implement buffer to hold all the data
+                    float value = atof(token);
+                    data_buffer_add_element_f(mesh->uv, value);
                 }
             }
         }
@@ -131,7 +127,9 @@ mesh_t* parse_obj(char* _arg)
                 {
                     if(j++ < 3)
                     {
-                       //Implement buffer to hold all the data
+                        data_buffer_add_element_i(mesh->f, atoi(token) - 1);
+                        // int a = atoi(token);
+                        // fprintf(stdout, "\n%i\n", a);
                     }
                 }
             }
@@ -139,9 +137,39 @@ mesh_t* parse_obj(char* _arg)
             free(cpy_line);
         }
     }
-    //fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
+    fprintf(stdout, "\nf: %i\nv: %i\nuv: %i\nn: %i\n", mesh->f->count, mesh->v->count, mesh->uv->count, mesh->n->count);
     free(lines);
     free((void*)file);
 
     return mesh;
+}
+
+void iterator_mesh(mesh_t *mesh, triangle_vertex_t *triangle, int *face)
+{
+    // int i = *face;
+    // int fv1 = mesh->f->element[i];
+    // int fn1 = mesh->f->element[i + 1];
+    // int fuv1 = mesh->f->element[i + 2];
+
+    // int fv2 = mesh->f->element[i + 3];
+    // int fn2 = mesh->f->element[i + 4];
+    // int fuv2 = mesh->f->element[i + 5];
+
+    // int fv3 = mesh->f->element[i + 6];
+    // int fn3 = mesh->f->element[i + 7];
+    // int fuv3 = mesh->f->element[i + 8];
+
+    // triangle->v[0].v = vec3_create(mesh->v->element[3 * fv1], mesh->v->element[3 * fv1 + 1], mesh->v->element[3 * fv1 + 2]);
+    // triangle->v[0].n = vec3_create(mesh->n->element[3 * fn1], mesh->n->element[3 * fn1 + 1], mesh->n->element[3 * fn1 + 2]);
+    // triangle->v[0].uv = vec2_create(mesh->uv->element[2 * fuv1], mesh->uv->element[2 * fuv1 + 1]);
+
+    // triangle->v[1].v = vec3_create(mesh->v->element[3 * fv2], mesh->v->element[3 * fv2 + 1], mesh->v->element[3 * fv2 + 2]);
+    // triangle->v[1].n = vec3_create(mesh->n->element[3 * fn2], mesh->n->element[3 * fn2 + 1], mesh->n->element[3 * fn2 + 2]);
+    // triangle->v[1].uv = vec2_create(mesh->uv->element[2 * fuv2], mesh->uv->element[fuv2 + 1]);
+
+    // triangle->v[2].v = vec3_create(mesh->v->element[3 * fv3], mesh->v->element[3 * fv3 + 1], mesh->v->element[3 * fv3 + 2]);
+    // triangle->v[2].n = vec3_create(mesh->n->element[3 * fn3], mesh->n->element[3 * fn3 + 1], mesh->n->element[3 * fn3 + 2]);
+    // triangle->v[2].uv = vec2_create(mesh->uv->element[2 * fuv1], mesh->uv->element[2 * fuv1 + 1]);
+
+    // *face += 9;
 }
