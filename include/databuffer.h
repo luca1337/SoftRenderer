@@ -1,13 +1,13 @@
 #ifndef _DATABUFFER_H
 #define _DATABUFFER_H
 
-#include <windows.h>
+#include <stdint.h>
 
 typedef struct data_buffer_f
 {
     float* element;
-    DWORD64 count;
-    DWORD64 size;
+    int64_t count;
+    int64_t size;
 }data_buffer_f_t;
 
 data_buffer_f_t* data_buffer_float_new(DWORD);
