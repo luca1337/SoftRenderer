@@ -19,17 +19,17 @@ int main(int argc, char *argv[])
     vec3_t p2 = create_vec3(50, 300, 20);
     vec3_t p3 = create_vec3(50, 50, 10);
 
-    triangle_t triangle = triangle_create(p1, p2, p3);
+    // triangle_t triangle = triangle_create(p1, p2, p3);
 
     doge_quat_t rott = doge_quat_create(0, 0, 0, 1);
 
-    camera_t* cam = camera_create_new(p0, 120.0f);
+    camera_t cam;
+    cam.position = p0;
+    cam.fov_y = 120;
 
     // mesh_t* mesh = read_mesh_obj("suzanne.obj");
 
     mesh_t* mesh = parse_obj("suzanne.obj");
-
-    // fprintf(stdout, "\nv: %i\nvn: %i\nvt: %i\nf: %i\n", mesh->v_count, mesh->vn_count, mesh->vt_count, mesh->f_count);
 
     //triangle_vertex_t* vert = malloc(sizeof(triangle_vertex_t));
 
@@ -47,11 +47,13 @@ int main(int argc, char *argv[])
 
         draw_context_clear(context, black);
 
-        draw_rectangle_wireframe(context, triangle, cam, red);
+        // draw_rectangle_wireframe(context, triangle, cam, red);
 
         //test methods
 
-        RasterizationBoundingBox(p1, p2, p3, context, red);
+        // draw_context_mesh_draw(context, mesh, cam, yellow);
+
+        // RasterizationBoundingBox(p1, p2, p3, context, red);
 
         draw_line_bresenham(context, 400, 300, x, y, yellow); //works
 

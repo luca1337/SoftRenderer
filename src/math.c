@@ -90,9 +90,17 @@ vec3_t sub_vec3(vec3_t a, vec3_t b)
     v.z = a.z-b.z;
     return v;
 }
-vec3_t scale_vec3(vec3_t v, float s)
+vec3_t scale_vec3_float(vec3_t v, float s)
 {
     return create_vec3(v.x * s, v.y * s, v.z * s);
+}
+vec3_t scale_vec3(vec3_t a, vec3_t b)
+{
+    vec3_t v;
+    v.x = a.x*b.x;
+    v.y = a.y*b.y;
+    v.z = a.z*b.z;
+    return v;
 }
 float slow_len_vec3( vec3_t a)
 {

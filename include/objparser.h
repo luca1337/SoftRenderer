@@ -1,9 +1,9 @@
 #ifndef OBJPARSER_H
 #define OBJPARSER_H
 
-#include "triangle.h"
-#include "list.h"
 #include "databuffer.h"
+#include "quaternion.h"
+#include "triangle.h"
 
 typedef struct mesh
 {
@@ -15,21 +15,35 @@ typedef struct mesh
 
 	vec3_t position;
 	doge_quat_t rot;
+	vec3_t scale;
+
+	struct triangle* head;
+    struct triangle* tail;
 
 }mesh_t;
 
-typedef struct mesh_vec3
+typedef struct list_item
 {
-	float x;
-	float y;
-	float z;
-}mesh_vec3_t;
+    void* item;
+    struct list_item* next;
+    struct list_item* prev;
+    
+} list_item_t;
+typedef struct list
+{
+    list_item_t* head;
+    list_item_t* tail;
+} list_t;
 
 mesh_t* mesh_create();
-mesh_t* mesh_destroy(mesh_t* mesh);
-void mesh_init(mesh_t* mesh);
-// void iterator_mesh(mesh_t *, triangle_t *, int *);
-// mesh_t* parse_file_float(char*);
+mesh_t* mesh_destroy(mesh_t*);
+void mesh_init(mesh_t*);
 mesh_t* parse_obj(char*);
+
+list_t* create_list();
+list_item_t* get_item_at_index(list_t*,int);
+list_item_t* create_list_item(void*); //take data
+void list_append2(list_t*, void*);
+int list_len2(list_t);
 
 #endif

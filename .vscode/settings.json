@@ -19,6 +19,7 @@
         "ctype.h": "c",
         "triangle.h": "c",
         "errno.h": "c",
-        "databuffer.h": "c"
+        "databuffer.h": "c",
+        "vertex.h": "c"
     }
 }

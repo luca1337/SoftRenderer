@@ -1,14 +1,109 @@
 #include "../include/objparser.h"
-#include "../include/list.h"
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <math.h>
 #include "../include/databuffer.h"
+#include "../include/triangle.h"
+#include <stdlib.h>
 
 #define _CRT_SECURE_NO_WARNINGS
 
 #define SIZE 4
+
+#ifdef __cplusplus
+  #include <cstring>
+  #define STD(x) std::x
+  namespace std {
+#else
+  #include <string.h>
+  #define STD(x) x
+#endif
+
+char* strsep( char** stringp, const char* delim )
+{
+char* result;
+
+if ((stringp == NULL) || (*stringp == NULL)) return NULL;
+
+result = *stringp;
+
+while (**stringp && !STD(strchr)( delim, **stringp )) ++*stringp;
+
+if (**stringp) *(*stringp)++ = '\0';
+else             *stringp    = NULL;
+
+return result;
+}
+
+list_t* create_list()
+{
+    list_t* list = malloc(sizeof(list_t));
+    if(!list)
+        return NULL;
+    list = memset(list,0,sizeof(list_t));
+    return list;
+}
+list_item_t* create_list_item(void* data) //take data
+{
+    list_item_t* item = malloc(sizeof(list_item_t));
+    if(!item)
+        return NULL;
+    item->item = data; 
+    return item;
+}
+void list_append2(list_t* list, void* item)
+{
+    list_item_t* _item = create_list_item(item);
+    if (list->head == NULL) //list is empty
+    {
+        list->head = _item;
+        list->tail = _item;
+    }
+    else
+    {
+        list->tail->next = _item;
+        _item->prev = list->tail;
+        list->tail = _item;
+    }
+}
+list_item_t* get_item_at_index(list_t* list,int index)
+{
+    list_item_t* item = list->head;
+    int counter = 0;
+    while(item)
+    {
+        if(counter == index)
+            return item;
+        item = item->next;
+        counter++;
+    }
+    // free(item);
+    return NULL;
+}
+int list_len2(list_t list)
+{
+    list_item_t* item = list.head;
+    int counter = 0;
+    while(item)
+    {
+        counter++;
+        item = item->next;
+    }
+    return counter;
+}
+int mesh_triangles_count(mesh_t mesh)
+{
+    triangle_t* t = mesh.head;
+    int counter = 0;
+    while(t)
+    {
+        counter++;
+        t = t->next;
+    }
+    return counter;
+}
 
 mesh_t* mesh_create()
 {
@@ -32,145 +127,192 @@ void mesh_init(mesh_t* mesh)
     mesh->n = NULL;
     mesh->f = NULL;
     mesh->position = create_vec3(0, 0, 0);
+    mesh->scale = create_vec3(0.2, 0.2, 0.2);
     mesh->rot = doge_quat_create(0, 0, 0, 1);
 }
 
 mesh_t* parse_obj(char* _arg)
 {
-    //open and allocate memory for file
-    FILE* file = fopen(_arg, "rb");
-    char* lines = malloc(sizeof(char) * 1000);
+    //to return
+    mesh_t* my_mesh = malloc(sizeof(mesh_t));
+    memset(my_mesh,0,sizeof(mesh_t));
 
-    //create mesh to store all values and init it
-    mesh_t* mesh = mesh_create();
-    mesh_init(mesh);
 
-    //create data structure to store all values
-    mesh_vec3_t* v = malloc(sizeof(mesh_vec3_t));
+    FILE* file;
+    file=fopen(_arg,"rb");
+    char* line = malloc(128);
+    int buffer_size = 128;
+    list_t* all_points_of_mesh = create_list(); 
+    list_t* all_normals_of_mesh = create_list();
+    list_t* all_uv_of_mesh = create_list();
 
-    if(!file)
+    while(file)
     {
-        fprintf(stderr, "could not open file: %s", _arg);
-        mesh_destroy(mesh);
-        free(lines);
-        return NULL;
-    }
-
-    mesh->v = data_buffer_new_f(0x0);
-    mesh->uv = data_buffer_new_f(0x0);
-    mesh->n = data_buffer_new_f(0x0);
-    mesh->f = data_buffer_new_i(0x0);
-
-    //enter in the loop and start parsing the file
-    while(!feof(file))
-    {
-        //while file reading also add the stream inside a buffer to get the lines
-        if(!fgets(lines, 1024, file))
+        if(!fgets(line,buffer_size,file))
             break;
         
-        //start parsing file
-        if(lines[0] == 'v' && lines[1] == ' ')
+        char *original_line = line;
+        char** token = &original_line;
+        char* item;
+
+        int is_f = 0;
+        int is_v = 0;
+        int is_vn = 0;
+        int is_vt = 0; //uv coords
+
+        list_t* float_for_vector = create_list();
+        list_t* list_3_vec_index = create_list(); //int
+        //new list floatindex normal (3)
+        list_t* list_3_normal_index = create_list();
+        //new list floatindex uv (2)
+        list_t* list_3_uv_index = create_list();
+
+        static int added = 0;
+        while(1)
         {
-            int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
+            item = strtok(token, " ");
+            item = strtok(NULL, " ");
+            if(!strcmp("f",item)) //is the start of an f line (next 3 elements must be splitted for "/" and the first may be taked)
             {
-                if(i++ > 0)
+                is_f = 1;
+                is_v = 0;
+                is_vn = 0;
+                is_vt = 0;
+                continue;                    
+            }
+            else if(!strcmp("v", item)) //is the start of an v line (next 3 elements are float of vector)
+            {
+                is_v = 1;
+                is_f = 0;
+                is_vn = 0;
+                is_vt = 0;
+                continue;                    
+            }
+            else if(!strcmp("vn",item))
+            {
+                is_v = 0;
+                is_f = 0;
+                is_vn = 1;
+                is_vt = 1;
+            }
+            else if(!strcmp("vt", item))
+            {
+                is_v = 0;
+                is_f = 0;
+                is_vn = 0;
+                is_vt = 1;
+            }
+            else
+            {
+                if(is_v)
                 {
-                    float value = atof(token);
-                    data_buffer_add_element_f(mesh->v, value);
+                    float* value = malloc(sizeof(float)); 
+                    *value = (float)atof(item); //transform string into floating point number
+                    // fprintf(stdout,"added point %f when item is %s\n",*value, item);
+                    list_append(float_for_vector,value); //add to my list
+                }
+                if(is_vn)
+                {
+                    float* value = malloc(sizeof(float)); 
+                    // fprintf(stdout,"%s \n",item);
+                    *value = (float)atof(item); //transform string into floating point number
+                    // fprintf(stdout,"added point %f when item is %s\n",*value, item);
+                    list_append(float_for_vector,value); //add to my normal list
+                }
+                if(is_vt)
+                {
+                    float* value = malloc(sizeof(float)); 
+                    *value = (float)atof(item); //transform string into floating point number
+                    // fprintf(stdout,"added point %f when item is %s\n",*value, item);
+                    list_append(float_for_vector,value); //add to my normal list
+                }
+                if(is_f)
+                {
+                    char** line_copy = &item;
+                    // fprintf(stdout,"line copied \n");
+                    char* index_vertex = strsep(line_copy,"/");  //get first element
+                    // fprintf(stdout,"line splited and return value %s \n",index);
+                    int* n_index_vertex = malloc(sizeof(int));
+                    *n_index_vertex = (atoi(index_vertex)); //convert to integer 
+                    // fprintf(stdout,"transformed in value %d \n",*n_index);
+
+                    char* index_uv = strsep(line_copy,"/");
+                    int* n_index_uv = malloc(sizeof(int));
+                    *n_index_uv = (atoi(index_uv));
+
+
+                    char* index_normal = strsep(line_copy,"/");
+                    int* n_index_normal = malloc(sizeof(int));
+                    *n_index_normal = (atoi(index_normal));
+                    
+                    list_append(list_3_vec_index,n_index_vertex); //add to list
+                    list_append(list_3_uv_index,n_index_uv);
+                    list_append(list_3_normal_index,n_index_normal);
                 }
             }
         }
-        else if(lines[1] == 'n')
+        //create vector and add to point list
+        if(is_v)
         {
-            int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
-            {
-                if(i++ > 0)
-                {
-                    float value = atof(token);
-                    data_buffer_add_element_f(mesh->n, value);
-                }
-            }
+            static int counter;
+            
+            struct doge_vec3* v = malloc(sizeof(struct doge_vec3)); 
+            if(!v) return NULL;
+            *v = create_vec3(*((float*)float_for_vector->head->item),*((float*)float_for_vector->head->next->item),*((float*) float_for_vector->head->next->next->item)*-1);     
+            list_append(all_points_of_mesh,v);
+            fprintf(stdout,"normal %d = %f %f %f\n",++counter,*((float*)float_for_vector->head->item),*((float*)float_for_vector->head->next->item),*((float*) float_for_vector->head->next->next->item)*-1);   
+            
         }
-        else if(lines[1] == 't')
+        if(is_vn)
         {
-            int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
-            {
-                if(i++ > 0) 
-                {
-                    float value = atof(token);
-                    data_buffer_add_element_f(mesh->uv, value);
-                }
-            }
+            static int counter;
+            struct doge_vec3* v = malloc(sizeof(struct doge_vec3)); 
+            if(!v) return NULL;
+            *v = create_vec3(*((float*)float_for_vector->head->item),*((float*)float_for_vector->head->next->item),*((float*) float_for_vector->head->next->next->item)*-1);     
+            list_append(all_normals_of_mesh,v);     
+            // fprintf(stdout,"normal %d = %f %f %f\n",++counter,v->x,v->y,v->z);   
         }
-
-        //parse f
-        if(lines[0] == 'f')
+        if(is_vt)
         {
-            char* cpy_line = malloc(sizeof(char) * strlen(lines) + 1);
-
-            static int i = 0;
-            for(char* token = strtok(lines, " "); token; token = strtok(((void*)0), " "))
-            {
-                if(i++ > 0)
-                {
-                    strcpy(cpy_line, token);
-                }
-            }
-
-            for(i = 1; i < SIZE; i++)
-            {
-                int j = 0;
-                for(char *token = strtok(cpy_line, "/"); token; token = strtok(((void*)0), "/"))
-                {
-                    if(j++ < 3)
-                    {
-                        int value = atoi(token) - 1;
-                        data_buffer_add_element_i(mesh->f, value);
-                        // int a = atoi(token);
-                        // fprintf(stdout, "\n%i\n", a);
-                    }
-                }
-            }
-
-            free(cpy_line);
+            struct doge_vec2* v = malloc(sizeof(struct doge_vec2)); 
+            if(!v) return NULL;
+            *v = create_vec2(*((float*)float_for_vector->head->item),*((float*)float_for_vector->head->next->item));     
+            list_append(all_uv_of_mesh,v);  
         }
+        if(is_f)
+        {
+            //create triangle 
+            int first_index = *(int*)get_item_at_index(list_3_vec_index,0)->item;
+            int second_index = *(int*)get_item_at_index(list_3_vec_index,1)->item;
+            int third_index = *(int*)get_item_at_index(list_3_vec_index,2)->item;
+            
+            vec3_t v1_pos = *(struct doge_vec3*)(get_item_at_index(all_points_of_mesh,first_index-1)->item); //p1 point
+            vec3_t v2_pos = *(struct doge_vec3*)(get_item_at_index(all_points_of_mesh,second_index-1)->item); //p2 point
+            vec3_t v3_pos = *(struct doge_vec3*)(get_item_at_index(all_points_of_mesh,third_index-1)->item);
+
+            vec3_t v1_norm = *(struct doge_vec3*)(get_item_at_index(all_normals_of_mesh,first_index-1)->item);
+            vec3_t v2_norm = *(struct doge_vec3*)(get_item_at_index(all_normals_of_mesh,second_index-1)->item);
+            vec3_t v3_norm = *(struct doge_vec3*)(get_item_at_index(all_normals_of_mesh,third_index-1)->item);
+            
+            vec2_t v1_uv = *(vec2_t*)(get_item_at_index(all_uv_of_mesh,first_index-1)->item);
+            vec2_t v2_uv = *(vec2_t*)(get_item_at_index(all_uv_of_mesh,second_index-1)->item);
+            vec2_t v3_uv = *(vec2_t*)(get_item_at_index(all_uv_of_mesh,third_index-1)->item);
+
+            triangle_t* t = triangle_create(create_vertex(v1_pos,v1_norm,v1_uv), create_vertex(v2_pos,v2_norm,v2_uv), create_vertex(v3_pos,v3_norm,v3_uv));
+            
+            //use meshaddtriangle
+            mesh_add_triangle(my_mesh,t);
+            // fprintf(stdout," triangle added to mesh  %f/%f/%f %f/%f/%f %f/%f/%f\n",t.a.x,t.a.y,t.a.z,t.b.x,t.b.y,t.b.z,t.c.x,t.c.y,t.c.z);
+            
+        }
+        
+        free(float_for_vector);
+        free(list_3_vec_index);
+        free(list_3_normal_index);
+        free(list_3_uv_index);
+        
     }
-    fprintf(stdout, "\nf: %i\nv: %i\nuv: %i\nn: %i\n", mesh->f->count, mesh->v->count, mesh->uv->count, mesh->n->count);
-    free(lines);
-    free((void*)file);
-
-    return mesh;
-}
-
-void iterator_mesh(mesh_t *mesh, triangle_vertex_t *triangle, int *face)
-{
-    // int i = *face;
-    // int fv1 = mesh->f->element[i];
-    // int fn1 = mesh->f->element[i + 1];
-    // int fuv1 = mesh->f->element[i + 2];
-
-    // int fv2 = mesh->f->element[i + 3];
-    // int fn2 = mesh->f->element[i + 4];
-    // int fuv2 = mesh->f->element[i + 5];
-
-    // int fv3 = mesh->f->element[i + 6];
-    // int fn3 = mesh->f->element[i + 7];
-    // int fuv3 = mesh->f->element[i + 8];
-
-    // triangle->v[0].v = vec3_create(mesh->v->element[3 * fv1], mesh->v->element[3 * fv1 + 1], mesh->v->element[3 * fv1 + 2]);
-    // triangle->v[0].n = vec3_create(mesh->n->element[3 * fn1], mesh->n->element[3 * fn1 + 1], mesh->n->element[3 * fn1 + 2]);
-    // triangle->v[0].uv = vec2_create(mesh->uv->element[2 * fuv1], mesh->uv->element[2 * fuv1 + 1]);
-
-    // triangle->v[1].v = vec3_create(mesh->v->element[3 * fv2], mesh->v->element[3 * fv2 + 1], mesh->v->element[3 * fv2 + 2]);
-    // triangle->v[1].n = vec3_create(mesh->n->element[3 * fn2], mesh->n->element[3 * fn2 + 1], mesh->n->element[3 * fn2 + 2]);
-    // triangle->v[1].uv = vec2_create(mesh->uv->element[2 * fuv2], mesh->uv->element[fuv2 + 1]);
-
-    // triangle->v[2].v = vec3_create(mesh->v->element[3 * fv3], mesh->v->element[3 * fv3 + 1], mesh->v->element[3 * fv3 + 2]);
-    // triangle->v[2].n = vec3_create(mesh->n->element[3 * fn3], mesh->n->element[3 * fn3 + 1], mesh->n->element[3 * fn3 + 2]);
-    // triangle->v[2].uv = vec2_create(mesh->uv->element[2 * fuv1], mesh->uv->element[2 * fuv1 + 1]);
-
-    // *face += 9;
+    //free all_points_of_mesh
+    fclose(file);
+    return my_mesh;
 }
